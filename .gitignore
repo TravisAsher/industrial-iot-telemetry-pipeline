@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+
+# ================================================================================================
+# CUSTOM PROJECT DATA PIPELINE TRACKING RULES
+# ================================================================================================
+
+# Prevent ingestion datasets and evaluation logs from uploading to GitHub
+*.csv
+*.log
+sensor_telemetry_raw.csv
