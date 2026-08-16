@@ -122,3 +122,5 @@ implementations, demonstrating highly resilient internal query graph assembly:
   indexing, the **Lambda/Selector approach** is structurally preferred in cloud-distributed
   environments (e.g., S3/GCS data lakes) because it keeps the optimization tree completely
   independent of remote network metadata requests during the initial graph assembly stage.
+
+#### NOTE: THIS IS ALL STILL A WORK IN PROGRESS. MORE COMING SOON.
