@@ -59,12 +59,8 @@ The tracking repository is structured across dedicated functional layers:
   Work in progress
   
 #### THE FOLLOWING ARE ALL WORKS IN PROGRESS
-* **Shape Consistency**: Resolved Pandas extraction `TypeErrors` by enforcing `expand=False` inside
-  the `.str.extract()` sequence to preserve 1-D Series dimensions during token parsing.
-* **Fixed-Point Precision**: Maintained spatial geographical coordinate accuracy by utilizing
-  Polars' precise fixed-point Decimal engine (`scale=4` and `scale=1`) to eliminate float flaws.
-* **Typing Synchronization**: Coerced temporal logging values into matching native datetimes
-  across both engines to guarantee end-to-end structural schema symmetry.
+* **Type-Consistency**: Enabled more flexible input methods for regex flags within my regex functions
+* **Shape Consistency**: Resolved Pandas extraction `TypeErrors` by enforcing `expand=False` inside the `.str.extract()` sequence to preserve 1-D Series dimensions during token parsing.
 
 
 
@@ -123,4 +119,8 @@ implementations, demonstrating highly resilient internal query graph assembly:
   environments (e.g., S3/GCS data lakes) because it keeps the optimization tree completely
   independent of remote network metadata requests during the initial graph assembly stage.
 
-#### NOTE: THIS IS ALL STILL A WORK IN PROGRESS. MORE COMING SOON.
+#### NOTE: THIS IS ALL STILL A WORK IN PROGRESS. MORE COMING SOON. PENDING ADDITIONS:
+
+* **Play-by-Play Commentary**: Will include my original comment notes for the project, compiled in RMarkdown format
+* **Type-Consistency**: Will include a more detailed break-down of the initial "Flag Handling" code in the regex functions
+* **Shape-Consistency**: Will detail the usage of parameters to maintain correct dimensionality
