@@ -17,7 +17,7 @@ import polars as pl
 from pathlib import Path
 
 # We begin with our given, raw data:
-sensor_telemetry_raw = {
+raw_data = {
     " SENSOR_ID  ": ["  sn-101 ", " sn-102", "sn-103 ", "SN-101", "sn-104", "sn-102 ", 
                      "  sn-105 "],
     "raw_logs": [
@@ -39,37 +39,37 @@ sensor_telemetry_raw = {
 # %%PART 0: Converting our Raw Dictionary Data into a Workable Form
 # ================================================================================================
 # We are creating a  DataFrame object using Pandas and a LazyFrame object using Polars. However, 
-#  we first need to convert our `dict` type sensor_telemetry_raw object into a csv object. To do 
+#  we first need to convert our `dict` type raw_data object into a csv object. To do 
 #  this, we will create a new physical csv file for Pandas and Polars to read. 
 # First, we will need to set the path for this file to be in the directory of this working file.
 script_dir = Path.cwd()
 csv_file_path = script_dir / "sensor_telemetry_raw.csv"
 
-# Next, we will open this filepath to write as a new_file and write the sensor_telemetry_raw
+# Next, we will open this filepath to write as a new_file and write the raw_data
 #  key values to it as column headers. We make use of `with open()` to open the file, keep it
 #  open while we write to it, and then close it when we are done. We use "w" to indicate that
 #  this operation is in "write-only mode".
 with open(csv_file_path, "w", newline="") as new_file:
     writer = csv.writer(new_file)
-    writer.writerow(list(sensor_telemetry_raw.keys()))
+    writer.writerow(list(raw_data.keys()))
 
-# For our next step, we need to make use of the .values() method of sensor_telemetry_raw. First, 
+# For our next step, we need to make use of the .values() method of raw_data. First, 
 #  we must coerce them into a list. Once we have that list version of them, we take a moment to
 #  consider the data. What do we have in this list of data? Letting our eyes adjust, we notice 
 #  that we have is a list of lists: first, a list of 3 sublists, each of which contains exactly
 #  7 elements. We note that each sublist of values corresponds to a single dictionary key in the
 #  original dataset. 
-dt_val = list(sensor_telemetry_raw.values())
+dt_val = list(raw_data.values())
 
 # We are definitely getting closer. We realize that we can't just write this object onto our
 #  virtual csv as it stands: it doesn't match our current written values, which consists of a
-#  list of 3 elements, each being a dictionary key value from the sensor_telemetry_raw 
+#  list of 3 elements, each being a dictionary key value from the raw_data 
 #  dictionary. This leads us to realize two things: (1), that the form that each additional row
 #  addended to string_buffer via the writer must be in the form of lists of exactly 3 values,
 #  and (2) that each value of the three sublists of dt_val correspond to the key entry of raw
 #  dictionary keys that was written onto string_buffer as its first row. We can now summarize
 #  what we need and what we have:
-    # What we need: we need to add the values of sensor_telemetry_raw into string_buffer from a
+    # What we need: we need to add the values of raw_data into string_buffer from a
     #  list of sublists; each sublist needs to contain three values, and the value in each index
     #  must correspond to its initial dictionary key value in the index of the first entry.
     # What we have: we have a list of 3 sublists each containing 7 values, dt_val. The values
