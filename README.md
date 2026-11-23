@@ -42,6 +42,7 @@ This pipeline ingests raw, malformed industrial sensor logs containing inconsist
 
 The tracking repository is structured across dedicated functional layers:
 
+* `Industrial_IoT_Telemetry_Pipeline - Annotated Build Walkthrough.py` - The raw Python document for this project. Includes my thought-process on tasks through comments
 * `Industrial_IoT_Telemetry_Pipeline.py` - Production pipeline featuring optimized, single-method
   execution chains utilizing **Pandas** DataFrame and **Polars** LazyFrame
 * `Project_Specification.Rmd`: Cleaned, synchronized project specification briefing written in RMarkdown.
