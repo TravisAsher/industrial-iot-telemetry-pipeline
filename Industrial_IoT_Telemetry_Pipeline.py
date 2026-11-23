@@ -42,14 +42,17 @@ raw_data = {
         "WARN|LOC:41.8781,-87.6298|VOLT:249.8"
     ],
     "timestamp": [
-        "2026-08-01 10:00", "2026-08-01 10:05", "2026-08-01 10:10", "2026-08-01 10:15", "2026-08-01 10:20",
-        "2026-08-01 10:25", "2026-08-01 10:30", "2026-08-01 10:35", "2026-08-01 10:40", "2026-08-01 10:45",
-        "2026-08-01 10:50", "2026-08-01 10:55", "2026-08-01 11:00", "2026-08-01 11:05", "2026-08-01 11:10"
+        "2026-08-01 10:00", "2026-08-01 10:05", "2026-08-01 10:10", "2026-08-01 10:15",
+        "2026-08-01 10:20",
+        "2026-08-01 10:25", "2026-08-01 10:30", "2026-08-01 10:35", "2026-08-01 10:40",
+        "2026-08-01 10:45",
+        "2026-08-01 10:50", "2026-08-01 10:55", "2026-08-01 11:00", "2026-08-01 11:05",
+        "2026-08-01 11:10"
     ]
 }
 
 # ================================================================================================
-# %%% Phase 0: Data Preparation and Ingestion
+# %%% Part 0: Data Preparation and Ingestion
 # ================================================================================================
 # Establish the pipeline directory paths
 script_dir = Path.cwd()
@@ -73,7 +76,7 @@ df_telemetry_source = pd.read_csv(csv_file_path)
 lf_telemetry_source = pl.scan_csv(csv_file_path)
 
 # ================================================================================================
-# END PHASE 0
+# END PART 0
 # ================================================================================================
 
 #### CORE EXECUTION PIPELINES ####
@@ -89,13 +92,13 @@ lf_telemetry_source = pl.scan_csv(csv_file_path)
 # %%% Phase 1: Ingestion, Header Normalization, and Token Extraction
 # Standardize column headers to lowercase and strip all structural whitespace.
 # Clean up sensor_id strings to establish a uniform uppercase format ("SN-101") with no 
-#   trailing padding.
+#  trailing padding.
 # Parse the raw_logs string column using Regular Expressions to extract three clean features:
     # (1) status: The alphabetic string preceding the first pipe (|) delimiter.
     # (2) latitude: The numeric coordinate text isolated immediately following the LOC:
-    #       flag.
+    #      flag.
     # (3) voltage: The floating-point decimal trailing the VOLT: flag, coercing non-numeric 
-    #       text like "missing" into true null values.
+    #      text like "missing" into true null values.
     # (4) timestamp: The raw temporal text string coerced into a native datetime object.
 df_parsed_features = (
     df_telemetry_source
@@ -116,7 +119,7 @@ df_parsed_features = (
 # Display the parsed checkpoint DataFrame and schema types
 print(f"Phase 1 Cleaned Pandas DataFrame:\n {df_parsed_features}\n")
 print(f"Data Types:\n {df_parsed_features.dtypes}\n")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"\n{'':-^80}\n")
 
 
 # %%% Phase 2: Priority Conditionals and Risk Profile Classification
@@ -125,7 +128,7 @@ print("\n-----------------------------------------------------------------------
     # If status is "ERROR" or "WARN" --> label it "HIGH".
     # Otherwise --> label it "STABLE".
     # Engine Constraints: Pandas must execute this vectorization step within .assign() via
-    #   np.select().
+    #  np.select().
 df_classified_risk = (
     df_parsed_features
     .assign(
@@ -143,12 +146,12 @@ df_classified_risk = (
 # Isolate target metrics to audit classification accuracy
 print(f"Phase 2 Classified Telemetry Audit:\n {
     df_classified_risk[['sensor_id', 'status', 'voltage', 'risk_profile']]}\n")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"\n{'':-^80}\n")
 
 
 # %%% Phase 3: Spatial Filtering and Anomaly Data Cleansing
 # Filter out and drop all rows containing missing values or null entries inside the extracted
-#   latitude and voltage columns.
+#  latitude and voltage columns.
 df_sanitized_stream = (
     df_classified_risk
     .query("not voltage.isna() and not latitude.isna()")
@@ -158,14 +161,14 @@ df_sanitized_stream = (
 df_nulls_removed = df_sanitized_stream[["sensor_id", "timestamp", "status", "latitude", 
                                         "voltage", "risk_profile"]]
 print(f"Phase 3 Nulls Removed:\n {df_nulls_removed}\n")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"\n{'':-^80}\n")
 
 
 # %%% Phase 4: Partitioned Analytics and Windowed Voltage Ranking
 # Compute a relative ranking metric across the dataset while fully preserving the row density of
-#   individual log records (no grouping or structural row reduction):
+#  individual log records (no grouping or structural row reduction):
     # Create a column named voltage_rank_in_sensor that ranks the row's voltage relative to that
-    #   specific sensor_id, ordered from highest to lowest voltage.
+    #  specific sensor_id, ordered from highest to lowest voltage.
     # Engine Constraints: Pandas must leverage .groupby().rank().
     # Output a Pandas DataFrame object that displays the number of each unique sensor_id values
 df_analytical_base = (
@@ -177,7 +180,7 @@ df_analytical_base = (
     )
 
 # Isolate the final computed attributes for analytical evaluation and output the grouped Pandas
-#   DataFrame displaying the amount of unique sensor_ids; finally, output final Pandas DataFrame
+#  DataFrame displaying the amount of unique sensor_ids; finally, output final Pandas DataFrame
 df_partitioned = (
     df_analytical_base[["sensor_id", "voltage", "voltage_rank_in_sensor"]]
     )
@@ -193,9 +196,10 @@ df_pandas_final = df_analytical_base[["sensor_id", "timestamp", "status", "latit
 
 print(f"Phase 4 Analytic Voltage Evaluation:\n {df_partitioned}\n")
 print(f"Phase 4 Unique Sensors Grouped Pandas DataFrame:\n {uniq_grpd_sensor_pd}\n")
-print("\n-------------------------------------------------------------------------------\n")
-print("----------------------------------FINAL PART 1---------------------------------")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"\n{'':-^80}\n")
+print(f"{'':_^80}\n")
+print(f"{'/%% |FINAL PART 1| %%\\':-^80}")
+print(f"{'':_^80}\n")
 print(f"Part 1 Final Pandas DataFrame:\n {df_pandas_final}\n")
 
 # ================================================================================================
@@ -211,13 +215,13 @@ print(f"Part 1 Final Pandas DataFrame:\n {df_pandas_final}\n")
 # %%% Phase 1: Ingestion, Header Normalization, and Token Extraction
 # Standardize column headers to lowercase and strip all structural whitespace.
 # Clean up sensor_id strings to establish a uniform uppercase format ("SN-101") with no 
-#   trailing padding.
+#  trailing padding.
 # Parse the raw_logs string column using Regular Expressions to extract three clean features:
     # (1) status: The alphabetic string preceding the first pipe (|) delimiter.
     # (2) latitude: The numeric coordinate text isolated immediately following the LOC:
-    #       flag.
+    #      flag.
     # (3) voltage: The floating-point decimal trailing the VOLT: flag, coercing non-numeric 
-    #       text like "missing" into true null values.
+    #      text like "missing" into true null values.
     # (4) timestamp: The raw temporal text string coerced into a native datetime object.
 lf_parsed_features = (
     lf_telemetry_source
@@ -237,7 +241,7 @@ pl_parsed = lf_parsed_features.collect()
 pl_parsed = pl_parsed.select("sensor_id","raw_logs","timestamp","status","latitude","voltage")
 print(f"Phase 1 Cleaned Polars DataFrame:\n {pl_parsed}")
 print(f"Data Types:\n {pl_parsed.dtypes}\n")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"\n{'':-^80}\n")
 
 
 # %%% Phase 2: Priority Conditionals and Risk Profile Classification
@@ -260,12 +264,12 @@ lf_classified_risk = (
 pl_risk = lf_classified_risk.collect()
 pl_risk = pl_risk.select("sensor_id","status","voltage","risk_profile")
 print(f"Phase 2 Classified Telemetry Audit:\n {pl_risk}")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"\n{'':-^80}\n")
 
 
 # %%% Phase 3: Spatial Filtering and Anomaly Data Cleansing
 # Filter out and drop all rows containing missing values or null entries inside the extracted
-#   latitude and voltage columns.
+#  latitude and voltage columns.
 lf_sanitized_stream = (
     lf_classified_risk.drop_nulls()
     )
@@ -273,19 +277,19 @@ lf_sanitized_stream = (
 # Isolate target records post-cleansing for terminal verification
 pl_sanitized = lf_sanitized_stream.collect()
 pl_sanitized = pl_sanitized.select("sensor_id","latitude","voltage")
-print(f"Phase 3 Nulls Removed::\n {pl_sanitized}")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"Phase 3 Nulls Removed:\n {pl_sanitized}")
+print(f"\n{'':-^80}\n")
 
 
 # %%% Phase 4: Partitioned Analytics and Windowed Voltage Ranking
 # Compute a relative ranking metric across the dataset while fully preserving the row density of
-#   individual log records (no grouping or structural row reduction):
+#  individual log records (no grouping or structural row reduction):
     # Create a column named voltage_rank_in_sensor that ranks the row's voltage relative to that
-    #   specific sensor_id, ordered from highest to lowest voltage.
+    #  specific sensor_id, ordered from highest to lowest voltage.
     # Engine Constraints: Polars must use an expression block evaluated over the partition via
-    #   .over().
+    #  .over().
     # Output a Polars DataFrame object that displays the number of each unique sensor_id values.
-    #   NOT required to be part of the single expression Polars query chain
+    #  NOT required to be part of the single expression Polars query chain
 lf_analytical_base = (
     lf_sanitized_stream.with_columns(
         voltage_rank_in_sensor = pl.col("voltage").rank("ordinal", descending=True)
@@ -294,7 +298,7 @@ lf_analytical_base = (
     )
 
 # Isolate the final computed attributes for analytical evaluation and output the grouped Polars
-#   DataFrame displaying the amount of unique sensor_ids
+#  DataFrame displaying the amount of unique sensor_ids
 pl_partitioned = lf_analytical_base.collect()
 pl_partitioned = pl_partitioned.select("sensor_id","voltage","voltage_rank_in_sensor")
 
@@ -308,13 +312,13 @@ uniq_grpd_sensor_pl = (
 
 print(f"Phase 4 Analytic Voltage Evaluation:\n {pl_partitioned}\n")
 print(f"Phase 4 Unique Sensors Grouped Polars DataFrame:\n {uniq_grpd_sensor_pl}\n")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"\n{'':-^80}\n")
 
 
 # %%% Phase 5: Query Plan Inspection and Lazy Engine Performance Audit
 # Evaluate the compiled query graph of the finalized Polars pipeline:
     # Output the optimized logical execution tree to the terminal console using the .explain()
-    #   inspector to audit predicate pushdowns executed by the Polars optimization tree.
+    #  inspector to audit predicate pushdowns executed by the Polars optimization tree.
     # Output the full, final Polars DataFrame.
 df_polars_final = (
     lf_analytical_base.collect()
@@ -323,10 +327,11 @@ df_polars_final = (
 )
 
 # Print the final Polars LazyFrame optimization network and the collected DataFrame
-print("----------------------------------FINAL PART 2---------------------------------")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"{'':_^80}\n")
+print(f"{'/%% |FINAL PART 2| %%\\':-^80}")
+print(f"{'':_^80}\n")
 print(f"Part 2: Polars LazyFrame Optimization Explanation:\n {lf_analytical_base.explain()}")
-print("\n-------------------------------------------------------------------------------\n")
+print(f"\n{'':-^80}\n")
 print(f"Part 2: Polars Final DataFrame:\n {df_polars_final}\n")
 
 # ================================================================================================
