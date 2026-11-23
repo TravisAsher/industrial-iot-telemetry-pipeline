@@ -59,11 +59,6 @@ The tracking repository is structured across dedicated functional layers:
 * **Regular Expressions**: Purpose of this document was to understand regular expressions further.
   Work in progress
   
-#### THE FOLLOWING ARE ALL WORKS IN PROGRESS
-* **Type-Consistency**: Enabled more flexible input methods for regex flags within my regex functions
-* **Shape Consistency**: Resolved Pandas extraction `TypeErrors` by enforcing `expand=False` inside the `.str.extract()` sequence to preserve 1-D Series dimensions during token parsing.
-
-
 
 
 ## Query Plan Evaluation and Optimizer Deep Dive
@@ -120,8 +115,4 @@ implementations, demonstrating highly resilient internal query graph assembly:
   environments (e.g., S3/GCS data lakes) because it keeps the optimization tree completely
   independent of remote network metadata requests during the initial graph assembly stage.
 
-#### NOTE: THIS IS ALL STILL A WORK IN PROGRESS. MORE COMING SOON. PENDING ADDITIONS:
 
-* **Play-by-Play Commentary**: Will include my original comment notes for the project, compiled in RMarkdown format
-* **Type-Consistency**: Will include a more detailed break-down of the initial "Flag Handling" code in the regex functions
-* **Shape-Consistency**: Will detail the usage of parameters to maintain correct dimensionality
