@@ -35,9 +35,9 @@ sensor_telemetry_raw = {
 }
 
 
-# =============================================================================
+# ================================================================================================
 # %%PART 0: Converting our Raw Dictionary Data into a Workable Form
-# =============================================================================
+# ================================================================================================
 # We are creating a  DataFrame object using Pandas and a LazyFrame object using Polars. However, 
 #  we first need to convert our `dict` type sensor_telemetry_raw object into a csv object. To do 
 #  this, we will create a new physical csv file for Pandas and Polars to read. 
@@ -103,10 +103,9 @@ with open(csv_file_path, "a", newline = "") as new_file:
 df_pd_raw = pd.read_csv(csv_file_path)
 lf_pl_raw = pl.scan_csv(csv_file_path)
 
-# =============================================================================
+# ================================================================================================
 # END PART 0
-# =============================================================================
-# %%===========================================================================
+# ================================================================================================
 
 
 
@@ -115,9 +114,9 @@ lf_pl_raw = pl.scan_csv(csv_file_path)
 #  single expression chain for Polars. No intermediate variables allowed!
 
 
-# =============================================================================
+# ================================================================================================
 # %%PART 1: Pandas Implementation with Pandas DataFrame Objects
-# =============================================================================
+# ================================================================================================
 
 # %%% Task 1: Ingestion, Header Normalization, and Token Extraction
 # Standardize column headers to lowercase and strip all structural whitespace.
@@ -257,7 +256,14 @@ df_pd_cleaned = (
 #  something that satisfies cond_A will always satisfy cond_B, cond_A will be listed first.
 #  Finally, if both conditions evaluate to False, the value of parameter 'default' will be
 #  assigned.
-test2 = df_pd_cleaned.assign(risk_profile = lambda df: np.select([(df["status"] == 'ERROR') & (df["voltage"] > 250), df["status"].str.fullmatch(r"ERROR|WARN")], ["CRITICAL", "HIGH"], "STABLE"))
+test2 = (
+    df_pd_cleaned.
+    assign(
+        risk_profile = lambda df: np.select([(df["status"] == 'ERROR') & (df["voltage"] > 250),
+                                             df["status"].str.fullmatch(r"ERROR|WARN")],
+                                            ["CRITICAL", "HIGH"], "STABLE")
+        )
+    )
 pd_task2 = test2[["status","voltage","risk_profile"]]
 print(f"Task 2 relevant Pandas DataFrame:\n {pd_task2}\n")
 
@@ -335,7 +341,11 @@ test4.groupby(["sensor_id"])["voltage"].rank(ascending=False)
 # Finally, we will perform an assignment of the result of this ranking to our dataframe. We use
 #  .assign(), name the new column "voltage_rank_in_sensor", and define our dataframe to equal
 #  this assignment.
-test4 = test4.assign(voltage_rank_in_sensor = lambda df: df.groupby(["sensor_id"])["voltage"].rank(ascending=False))
+test4 = (
+    test4
+    .assign(voltage_rank_in_sensor = lambda df: 
+            df.groupby(["sensor_id"])["voltage"].rank(ascending=False))
+    )
 pd_task4 = test4[["sensor_id","voltage","voltage_rank_in_sensor"]]
 print(f"Task 4 relevant Pandas DataFrame:\n {pd_task4}\n")
 
@@ -352,16 +362,16 @@ df_pd_grouprank = (
 
 
 
-# =============================================================================
+# ================================================================================================
 # END PART 1
-# =============================================================================
-# %%===========================================================================
+# ================================================================================================
+# %%==============================================================================================
 
 
 
-# =============================================================================
+# ================================================================================================
 # %%PART 2: Polars Implementation with Polars LazyFrame Objects
-# =============================================================================
+# ================================================================================================
 
 # %%% Task 1: Ingestion, Header Normalization, and Token Extraction
 # Standardize column headers to lowercase and strip all structural whitespace.
@@ -454,7 +464,10 @@ regex_volt = r"VOLT:((?:\d+\.\d+)|[a-zA-Z]+)$"
 
 # We now test how a chain of subtask (C) would appear. We also would like to coerce latitude and
 #  voltage values to numeric. We will also coerce the errors.
-pl_tst1.with_columns(status = pl.col("raw_logs").str.extract(regex_status), latitude = pl.col("raw_logs").str.extract(regex_lat_neg).str.to_decimal(scale=4), voltage = pl.col("raw_logs").str.extract(regex_volt).str.to_decimal(scale=1)).collect()
+pl_tst1.with_columns(
+    status = pl.col("raw_logs").str.extract(regex_status),
+    latitude = pl.col("raw_logs").str.extract(regex_lat_neg).str.to_decimal(scale=4),
+    voltage = pl.col("raw_logs").str.extract(regex_volt).str.to_decimal(scale=1)).collect()
 
 
 # We now complete Task 1 by performing all of the above in a single chain, naming it to a new
@@ -589,11 +602,12 @@ part2_polars_dataframe = lf_pl_final.collect()
 print("\n-------------------------------------------------------------------------------\n")
 print(f"Part 2: Polars DataFrame:\n {part2_polars_dataframe}\n")
 
-    
-    
-    
-    
-    
-    
-    
-    
+# ================================================================================================
+# END PART 2
+# ================================================================================================
+
+
+
+# ================================================================================================
+# END OF PIPELINE SCRIPT DOCUMENT
+# ================================================================================================  
